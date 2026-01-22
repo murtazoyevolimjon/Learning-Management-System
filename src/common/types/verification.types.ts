@@ -1,7 +1,7 @@
 export enum EVerificationTypes {
     REGISTER = 'register',
-    RESET_PASSWORD = 'reset_password',
-    EDIT_PHONE = 'edit_phone',
+    RESET_PASSWORD = 'reset-password',
+    EDIT_PHONE = 'edit-phone',
 }
 
 export interface ICheckOtp {
