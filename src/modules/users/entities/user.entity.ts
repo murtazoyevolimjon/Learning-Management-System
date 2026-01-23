@@ -5,7 +5,7 @@ export class UserEntity {
     @ApiProperty({ example: 1 })
     id: number
 
-    @ApiProperty({ example: '+998901112233' })
+    @ApiProperty({ example: '+998997776655' })
     phone: string
 
     @ApiProperty({ example: 'string' })

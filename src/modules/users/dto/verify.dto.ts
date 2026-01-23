@@ -7,14 +7,14 @@ export class SendOtpDto {
     @IsEnum(EVerificationTypes)
     type: EVerificationTypes
 
-    @ApiProperty({ example: '998901234567' })
+    @ApiProperty({ example: '998997776655' })
     @IsString()
     @IsNotEmpty()
     phone: string;
 }
 
 export class VerifyOtpDto {
-    @ApiProperty({ example: '998901234567' })
+    @ApiProperty({ example: '998997776655' })
     @IsString()
     @IsNotEmpty()
     phone: string;

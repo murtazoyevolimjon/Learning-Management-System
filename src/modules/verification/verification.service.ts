@@ -1,90 +1,59 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { SendOtpDto, VerifyOtpDto } from '../users/dto/verify.dto';
-import { RedisService } from '../../common/redis/redis.service';
-import { SmsService } from '../../common/services/sms.service';
-import { EVerificationTypes } from '../../common/types/verification.types';
-import { generateOtp } from '../../common/core/random';
+import { RedisService } from 'src/common/redis/redis.service';
+import { SmsService } from 'src/common/services/sms.service';
+import { EVerificationTypes } from 'src/common/types/verification.types';
+import { generateOtp } from 'src/common/core/random';
+import { CreateVericationDto } from './dto/register.verification.dto';
 
 @Injectable()
-export class VerificationService {
+export class VericationService {
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly redis: RedisService,
-    private readonly smsService: SmsService,
+    private redis: RedisService,
+    private sms: SmsService,
   ) { }
 
-  private getKey(
-    type: EVerificationTypes,
-    phone: string,
-    confirmation?: boolean,
-  ) {
-    const storeKeys: Record<EVerificationTypes, string> = {
-      [EVerificationTypes.REGISTER]: 'reg_',
-      [EVerificationTypes.RESET_PASSWORD]: 'respass_',
-      [EVerificationTypes.EDIT_PHONE]: 'edph_',
-    };
-    let key = storeKeys[type];
-    if (confirmation) key += 'cfm_';
-    key += phone;
-    return key;
-  }
-
-  private async throwIfUserExists(phone: string) {
-    const user = await this.prisma.user.findUnique({ where: { phone } });
-    if (user)
-      throw new HttpException('Phone already used', HttpStatus.BAD_REQUEST);
-    return user;
-  }
-
-  private getMessage(type: EVerificationTypes, otp: string) {
-    switch (type) {
-      case EVerificationTypes.REGISTER:
-        return `Fixoo platformasidan ro'yxatdan o'tish uchun tasdiqlash kodi: ${otp}. Kodni hech kimga bermang!`;
-
-      case EVerificationTypes.RESET_PASSWORD:
-        return `Fixoo platformasida parolingizni tiklash uchun tasdiqlash kodi: ${otp}. Kodni hech kimga bermang!`;
-
-      case EVerificationTypes.EDIT_PHONE:
-        return `Fixoo platformasida telefoningizni o'zgartirish uchun tasdiqlash kodi: ${otp}. Kodni hech kimga bermang!`;
-    }
-  }
-
-  async sendOtp(payload: SendOtpDto) {
-    const { type, phone } = payload;
-    const key = this.getKey(type, phone);
-
-    const existing = await this.redis.get(key);
-    if (existing)
-      throw new HttpException('OTP already sent', HttpStatus.BAD_REQUEST);
-
-    if (type === EVerificationTypes.REGISTER) {
-      await this.throwIfUserExists(phone);
-    }
-
+  async sendOtp(type: EVerificationTypes, phone: string) {
     const otp = generateOtp();
-    await this.redis.set(key, otp, 600); // 10 minute
-    await this.smsService.sendSMS(this.getMessage(type, otp), phone);
+    const key = `${type}_${phone}`;
+    await this.redis.set(key, otp, 600); // 10 daqiqa
 
-    return { message: 'OTP sent successfully' };
+    let message = '';
+    if (type === EVerificationTypes.REGISTER) {
+      message = `Fixoo platformasidan ro'yxatdan o'tish uchun tasdiqlash kodi: ${otp}. Kodni hech kimga bermang!`;
+    } else if (type === EVerificationTypes.RESET_PASSWORD) {
+      message = `Fixoo platformasida parolingizni tiklash uchun tasdiqlash kodi: ${otp}. Kodni hech kimga bermang!`;
+    } else if (type === EVerificationTypes.EDIT_PHONE) {
+      message = `Fixoo platformasida telefoningizni o'zgartirish uchun tasdiqlash kodi: ${otp}. Kodni hech kimga bermang!`;
+    }
+
+    await this.sms.sendSMS(message, phone);
+    return {
+      message: 'OTP SMS orqali yuborildi',
+      success: true,
+    };
   }
 
-  async verifyOtp(payload: VerifyOtpDto) {
-    const { phone, otp } = payload;
-    const key = this.getKey(EVerificationTypes.REGISTER, phone);
-
+  async verifyOtp(dto: CreateVericationDto) {
+    const key = `${dto.type}_${dto.phone}`;
     const storedOtp = await this.redis.get(key);
-    if (!storedOtp)
-      throw new HttpException('OTP expired', HttpStatus.BAD_REQUEST);
-    if (storedOtp !== otp)
-      throw new HttpException('Invalid OTP', HttpStatus.BAD_REQUEST);
 
-    await this.prisma.user.update({
-      where: { phone },
-      data: { isVerified: true },
-    });
+    if (!storedOtp || storedOtp !== dto.otp) {
+      throw new HttpException(
+        "OTP noto'g'ri yoki muddati tugagan",
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
+    return {
+      message: 'OTP muvaffaqiyatli tasdiqlandi',
+      type: dto.type,
+      phone: dto.phone,
+      success: true,
+    };
+  }
+
+  async deleteOtp(type: EVerificationTypes, phone: string) {
+    const key = `${type}_${phone}`;
     await this.redis.delete(key);
-    return { message: 'User verified successfully' };
   }
 }

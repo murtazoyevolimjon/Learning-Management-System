@@ -1,22 +1,24 @@
 import { Controller, Post, Body } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { VerificationService } from './verification.service';
-import { SendOtpDto, VerifyOtpDto } from '../users/dto/verify.dto';
+import { ApiTags } from '@nestjs/swagger';
+import { VericationService } from './verification.service';
+import { SendOtpDto } from './dto/send-otp.verification.dto';
+import { IsPublic } from 'src/common/decorator/is-publik.decorator';
+import { CreateVericationDto } from './dto/register.verification.dto';
 
 @ApiTags('Verification')
 @Controller('verification')
-export class VerificationController {
-  constructor(private readonly verificationService: VerificationService) { }
+export class VericationController {
+  constructor(private readonly vericationService: VericationService) { }
 
-  @Post('send')
-  @ApiOperation({ summary: 'string' })
+  @IsPublic()
+  @Post('send-otp')
   async sendOtp(@Body() dto: SendOtpDto) {
-    return this.verificationService.sendOtp(dto)
+    return this.vericationService.sendOtp(dto.type, dto.phone);
   }
 
-  @Post('verify')
-  @ApiOperation({ summary: 'string' })
-  async verifyOtp(@Body() dto: VerifyOtpDto) {
-    return this.verificationService.verifyOtp(dto);
+  @IsPublic()
+  @Post('verify-otp')
+  async verifyOtp(@Body() dto: CreateVericationDto) {
+    return this.vericationService.verifyOtp(dto);
   }
 }

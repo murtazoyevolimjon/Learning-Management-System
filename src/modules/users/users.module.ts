@@ -1,15 +1,17 @@
 import { Module } from '@nestjs/common';
 import { RedisService } from 'src/common/redis/redis.service';
 import { SmsService } from 'src/common/services/sms.service';
+import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { UsersController } from './users.controller';
-import { UsersService } from './users.service';
+import { VericationModule } from '../verification/verification.module';
 
 @Module({
   imports: [
     ConfigModule,
+    VericationModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

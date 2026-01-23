@@ -3,13 +3,29 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ModulesModule } from './modules/modules.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
-import { RedisModule } from './common/redis/redis.module';
 import { ConfigModule } from '@nestjs/config';
-import { VerificationModule } from './modules/verification/verification.module';
+import { RedisModule } from './common/redis/redis.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { VericationModule } from './modules/verification/verification.module';
 
 @Module({
-  imports: [ModulesModule, PrismaModule, RedisModule, ConfigModule, VerificationModule],
+  imports: [
+    ModulesModule,
+    PrismaModule,
+    RedisModule,
+    ConfigModule.forRoot({
+      isGlobal: true
+    }),
+    VericationModule
+  ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule { }

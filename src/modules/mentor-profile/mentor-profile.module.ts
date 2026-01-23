@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
-import { MentorProfileService } from './mentor-profile.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { ConfigService } from '@nestjs/config';
 import { MentorProfileController } from './mentor-profile.controller';
+import { MentorProfileService } from './mentor-profile.service';
 
 @Module({
   controllers: [MentorProfileController],
-  providers: [MentorProfileService],
+  providers: [MentorProfileService, PrismaService, ConfigService],
+  exports: [MentorProfileService]
 })
-export class MentorProfileModule {}
+export class MentorProfileModule { }

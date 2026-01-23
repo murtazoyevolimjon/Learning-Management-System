@@ -1,30 +1,31 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { UserRole } from '@prisma/client';
-import { EVerificationTypes } from 'src/common/types/verification.types';
+import { IsString, IsEnum, MinLength, IsOptional } from 'class-validator';
 
-export class RegisterUserDto {
-    @ApiProperty({ example: '998901234567' })
-    @IsNotEmpty()
+export class RegisterDto {
+    @ApiProperty({ example: '+998997776655' })
     @IsString()
-    phone: string;
+    phone: string
 
-    @ApiProperty({ example: 'password123' })
-    @IsNotEmpty()
+    @ApiProperty({ example: 'string' })
     @IsString()
-    password: string;
+    fullName: string
 
-    @ApiProperty({ example: 'John Doe' })
-    @IsNotEmpty()
+    @ApiProperty({ example: 'xxxxxx', minLength: 6 })
     @IsString()
-    fullName: string;
+    @MinLength(6)
+    password: string
 
-    @ApiProperty({ enum: UserRole, example: UserRole.STUDENT, required: false })
+    @ApiProperty({ enum: UserRole, default: UserRole.STUDENT })
     @IsEnum(UserRole)
-    @IsOptional()
-    role?: UserRole;
+    role: UserRole = UserRole.STUDENT
 
-    @ApiProperty({ enum: EVerificationTypes, example: EVerificationTypes.REGISTER })
-    @IsEnum(EVerificationTypes)
-    type: EVerificationTypes;
+    @ApiProperty({ example: 'http://example.com/image.jpg' })
+    @IsOptional()
+    @IsString()
+    image?: string
+
+    @ApiProperty({ example: 'xxxxxx' })
+    @IsString()
+    otp: string
 }
