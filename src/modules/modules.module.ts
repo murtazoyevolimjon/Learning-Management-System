@@ -9,6 +9,7 @@ import { MentorProfileModule } from './mentor-profile/mentor-profile.module';
 import { CourseCategoryModule } from './course-category/course-category.module';
 import { LessonGroupModule } from './lesson-group/lesson-group.module';
 import { JwtStrategy } from 'src/common/stratigies/jwt.strategy';
+import { AssignedCourseModule } from './assigned-course/assigned-course.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { JwtStrategy } from 'src/common/stratigies/jwt.strategy';
     CourseCategoryModule,
     LessonGroupModule,
     ProfileModule,
+    AssignedCourseModule,
   ],
   providers: [JwtStrategy],
 })
