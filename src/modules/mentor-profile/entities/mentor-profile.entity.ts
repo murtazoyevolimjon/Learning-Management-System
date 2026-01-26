@@ -1,1 +1,1 @@
-export class MentorProfile {}
+export class Rating { }

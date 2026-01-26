@@ -1,26 +1,88 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateLessonGroupDto } from './dto/create-lesson-group.dto';
 import { UpdateLessonGroupDto } from './dto/update-lesson-group.dto';
 
 @Injectable()
 export class LessonGroupService {
-  create(createLessonGroupDto: CreateLessonGroupDto) {
-    return 'This action adds a new lessonGroup';
+  constructor(private prisma: PrismaService) { }
+  async create(createLessonGroupDto: CreateLessonGroupDto) {
+    const lessonGroup = await this.prisma.lessonGroup.create({
+      data: {
+        name: createLessonGroupDto.name,
+        courseId: createLessonGroupDto.courseId
+      },
+      include: {
+        course: true,
+        lessons: true,
+        exams: true,
+      }
+    })
+    return lessonGroup
+  }
+  async findAll() {
+    const lessonGroups = await this.prisma.lessonGroup.findMany({
+      include: {
+        course: true,
+        lessons: true,
+        exams: true
+      }
+    })
+    return lessonGroups
   }
 
-  findAll() {
-    return `This action returns all lessonGroup`;
+  async findOne(id: string) {
+    const lessonGroup = await this.prisma.lessonGroup.findUnique({
+      where: { id },
+      include: {
+        course: true,
+        lessons: true,
+        exams: true
+      }
+    })
+    if (!lessonGroup) {
+      throw new NotFoundException(`LessonGroupId id ${id} topilmadi`)
+    }
+    return lessonGroup
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} lessonGroup`;
+  async update(id: string, updateLessonGroupDto: UpdateLessonGroupDto) {
+    const lessonGroup = await this.prisma.lessonGroup.findUnique({
+      where: { id }
+    })
+    if (!lessonGroup) {
+      throw new NotFoundException(`LessonGroupId ${id} topilmadi`)
+    }
+
+    const updatedLesson = await this.prisma.lessonGroup.update({
+      where: { id },
+      data: {
+        name: updateLessonGroupDto.name || lessonGroup.name,
+        courseId: updateLessonGroupDto.courseId || lessonGroup.courseId
+      },
+      include: {
+        course: true,
+        lessons: true,
+        exams: true
+      }
+    })
+    return updatedLesson
   }
 
-  update(id: number, updateLessonGroupDto: UpdateLessonGroupDto) {
-    return `This action updates a #${id} lessonGroup`;
-  }
+  async remove(id: string) {
+    const lessonGroup = await this.prisma.lessonGroup.findUnique({
+      where: { id }
+    })
+    if (!lessonGroup) {
+      throw new NotFoundException(`LessonGroupId id ${id} topilmadi`)
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} lessonGroup`;
+    await this.prisma.lessonGroup.delete({
+      where: { id },
+      include: {
+        course: true
+      }
+    })
+    return "LessonGroup o'chirildi"
   }
 }

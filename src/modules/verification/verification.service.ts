@@ -15,7 +15,7 @@ export class VericationService {
   async sendOtp(type: EVerificationTypes, phone: string) {
     const otp = generateOtp();
     const key = `${type}_${phone}`;
-    await this.redis.set(key, otp, 600); // 10 daqiqa
+    await this.redis.set(key, otp, 600);
 
     let message = '';
     if (type === EVerificationTypes.REGISTER) {

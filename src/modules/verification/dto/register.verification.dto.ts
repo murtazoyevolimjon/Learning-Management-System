@@ -3,7 +3,7 @@ import { IsString, IsEnum } from 'class-validator';
 import { EVerificationTypes } from 'src/common/types/verification.types';
 
 export class CreateVericationDto {
-    @ApiProperty({ example: '+998901112233' })
+    @ApiProperty({ example: '+998997776655' })
     @IsString()
     phone: string
 
@@ -11,7 +11,7 @@ export class CreateVericationDto {
     @IsEnum(EVerificationTypes)
     type: EVerificationTypes
 
-    @ApiProperty({ example: '000000' })
+    @ApiProperty({ example: 'xxxxxx' })
     @IsString()
     otp: string
 }

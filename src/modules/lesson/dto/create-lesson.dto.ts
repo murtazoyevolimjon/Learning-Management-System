@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty } from 'class-validator';
+import { Exclude } from 'class-transformer';
 
-export class CreateLessonGroupDto {
+export class CreateLessonDto {
     @ApiProperty({ example: 'string' })
     @IsString()
     @IsNotEmpty()
@@ -10,5 +11,12 @@ export class CreateLessonGroupDto {
     @ApiProperty({ example: 'string' })
     @IsString()
     @IsNotEmpty()
-    courseId: string
+    about: string
+
+
+    @ApiProperty({ type: 'string', format: 'uuid' })
+    @IsString()
+    @IsNotEmpty()
+    bolimId: string
+
 }

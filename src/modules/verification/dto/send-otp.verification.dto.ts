@@ -3,7 +3,7 @@ import { IsString, IsEnum } from 'class-validator';
 import { EVerificationTypes } from 'src/common/types/verification.types';
 
 export class SendOtpDto {
-    @ApiProperty({ example: '+998901112233' })
+    @ApiProperty({ example: '+998997776655' })
     @IsString()
     phone: string
 
